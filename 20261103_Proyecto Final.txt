@@ -1,0 +1,18 @@
+Proyecto Final (CS1400)
+
+11/03/2026
+09:30
+
+- Tito Huerta
+- Eduardo Reyes
+
+Topics:
+1. Check the project's rubrica
+2. Discussion about the scope of the projects
+3. Check Open Method
+
+
+Agreements:
+1. Tito will create the GitHub project
+2. Eduardo will send the topic discussion 
+3. Each one start with a single page in python to ask for the first task

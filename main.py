@@ -1,4 +1,5 @@
-# Proyecto Final - Camino a mi casa
+# Menú y flujo principal
+# # Proyecto Final - Camino a mi casa
 # Bienvenida al programa
 print("=====================================")
 print("   CAMINO A MI CASA")
