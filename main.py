@@ -2,6 +2,15 @@
 # # Proyecto Final - Camino a mi casa
 # Bienvenida al programa
 # test
+import sys
+
+# Asegura que el usuario proporcione un argumento de texto al ejecutar el script
+
+if len(sys.argv) < 2:
+    print("Error: Missing text input argument.")
+    print(f"Usage: python {sys.argv[0]} <your_name>")
+    sys.exit(1)  # Exit program with an error status code
+
 print("=====================================")
 print("   CAMINO A MI CASA")
 print("=====================================")
