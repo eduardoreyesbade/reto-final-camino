@@ -1,7 +1,7 @@
 # Menú y flujo principal
 # # Proyecto Final - Camino a mi casa
 # Bienvenida al programa
-# test
+# test2
 import sys
 
 # Asegura que el usuario proporcione un argumento de texto al ejecutar el script
