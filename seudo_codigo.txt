@@ -1,0 +1,52 @@
+INICIO
+
+  MOSTRAR mensaje de bienvenida y que hace el programa
+
+      MOSTRAR menú
+          1. Calcular distancia entre dos ciudades
+          2. Salir
+
+      PEDIR opción al usuario
+
+      SI opción es 1 ENTONCES
+
+          REPETIR
+              PEDIR ciudad de origen
+          HASTA QUE el texto no esté vacío (validacion)
+
+          REPETIR
+              PEDIR ciudad de destino
+          HASTA QUE el texto no esté vacío
+
+          BUSCAR coordenadas del origen en la API
+          BUSCAR coordenadas del destino en la API
+
+          SI alguna ciudad no se encontró ENTONCES
+              MOSTRAR "No encontramos esa ciudad"
+              VOLVER al menú
+          FIN SI
+
+          CALCULAR distancia en kilómetros con el API
+          CONVERTIR la distancia a millas
+
+          CALCULAR tiempo en avión = distancia / 800
+          CALCULAR tiempo en auto  = distancia / 80
+
+          MOSTRAR resumen:
+              nombre y país de cada ciudad
+              coordenadas de cada ciudad
+              distancia en km y en millas
+              tiempo en avión y en auto
+              aviso de que es distancia en línea recta
+
+      SI NO, SI opción es 2 ENTONCES
+          MOSTRAR despedida
+          SALIR del bucle
+
+      SI NO
+          MOSTRAR "Opción no válida"
+      FIN SI
+
+  FIN REPETIR
+
+FIN
