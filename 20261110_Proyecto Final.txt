@@ -1,0 +1,16 @@
+Proyecto Final (CS1400)
+
+11/10/2026
+09:30
+
+- Tito Huerta
+- Eduardo Reyes
+
+Topics:
+1. Organazing the job
+
+
+Agreements:
+1. Tito will update the README
+2. Tito will update the seudocode
+3. Eduardo already updated the git with its documents
