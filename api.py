@@ -2,7 +2,7 @@
 
 import requests
 
-def obtener_coordenadas(ciudad):
+def obtener_coordenadas(start, end):
     # Placeholder implementation - replace with actual API call
-    print(f'Fetching coordinates for: {ciudad}')
+    print(f'Fetching coordinates for: {start} and {end}')
     return (0, 0)  # Replace with actual coordinates

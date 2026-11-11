@@ -2,7 +2,8 @@
 # # Proyecto Final - Camino a mi casa
 # Bienvenida al programa
 # test2
-import sys
+
+# import sys
 
 # Asegura que el usuario proporcione un argumento de texto al ejecutar el script
 
@@ -21,8 +22,8 @@ while True:
     opcion = input("Ingrese la opción deseada: ").strip() # le quitamos espacios demas
     if opcion == "1":
         # Pedimos ambos ubicacaiones al usuario, las llevamos a minusculas y quitamos espacios de mas
-        start = input("Ingrese el lugar donde te encuentras (ciudad, pais): ").strip().lower()
-        end = input("Ingrese el lugar donde deseas llegar (ciudad, pais): ").strip().lower()
+        start = input("Ingrese el lugar donde te encuentras (ciudad, pais): ").strip()
+        end = input("Ingrese el lugar donde deseas llegar (ciudad, pais): ").strip()
         # Validamos que el usauro no entregue vacio
         if start == "" or end == "":
             print("Por favor, ingrese lugares válidos.")
@@ -50,8 +51,6 @@ while True:
     else:
         print("Opción no válida. Por favor, ingrese una opción válida.")
 
-from api import get_location_data
+from api import obtener_coordenadas
 
 # Pass the variable directly into the function from api.py
-obtener_coordenadas(ciudad)
-
