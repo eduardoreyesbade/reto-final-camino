@@ -6,10 +6,10 @@ import sys
 
 # Asegura que el usuario proporcione un argumento de texto al ejecutar el script
 
-if len(sys.argv) < 2:
-    print("Error: Missing text input argument.")
-    print(f"Usage: python {sys.argv[0]} <your_name>")
-    sys.exit(1)  # Exit program with an error status code
+# if len(sys.argv) < 2:
+#    print("Error: Missing text input argument.")
+#    print(f"Usage: python {sys.argv[0]} <your_name>")
+#    sys.exit(1)  # Exit program with an error status code
 
 print("=====================================")
 print("   CAMINO A MI CASA")
@@ -49,4 +49,9 @@ while True:
     # Ponemos esto en caso que no responde no 1 ni 2. 
     else:
         print("Opción no válida. Por favor, ingrese una opción válida.")
+
+from api import get_location_data
+
+# Pass the variable directly into the function from api.py
+obtener_coordenadas(ciudad)
 
