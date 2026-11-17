@@ -53,4 +53,5 @@ while True:
 
 from api import obtener_coordenadas
 
-# Pass the variable directly into the function from api.py
+datos_origen = obtener_coordenadas(start)
+datos_destino = obtener_coordenadas(end)
