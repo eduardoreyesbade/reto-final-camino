@@ -1,0 +1,31 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      // Corre SIEMPRE main.py, sin importar que archivo tengas abierto.
+      "name": "Camino a mi casa (main.py)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      // Corre las pruebas de la API (para las capturas de pantalla).
+      "name": "Pruebas de la API (pruebas_api.py)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/pruebas_api.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Archivo actual",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ]
+}

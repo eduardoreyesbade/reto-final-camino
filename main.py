@@ -1,57 +1,196 @@
-# Menú y flujo principal
-# # Proyecto Final - Camino a mi casa
-# Bienvenida al programa
-# test2
+# ============================================================
+# Reto Final - "Camino a mi casa" (CS1400)
+# Archivo: main.py  -> Menú y flujo principal
+# Paso 4: Entrada, salida y formato base (input / print)
+# Paso 5: Llama a api.py para obtener las coordenadas
+# Integrantes: Tito Huerta y Eduardo Reyes
+# Fecha: 17 de noviembre de 2026
+# ============================================================
+# Privacidad: al usuario solo se le piden CIUDAD y PAÍS.
+# Nunca direcciones exactas, ni en el código ni en GitHub.
 
-# import sys
-
-# Asegura que el usuario proporcione un argumento de texto al ejecutar el script
-
-# if len(sys.argv) < 2:
-#    print("Error: Missing text input argument.")
-#    print(f"Usage: python {sys.argv[0]} <your_name>")
-#    sys.exit(1)  # Exit program with an error status code
-
-print("=====================================")
-print("   CAMINO A MI CASA")
-print("=====================================")
-print("Este programa te ayudará a encontrar la distancia al destino deseado desde donde te encuentres.")
-while True:
-    # Comenzamos pidiendo las opciones al usuario
-    print("1. Calcular distancia entre dos ciudades \n2. Salir")
-    opcion = input("Ingrese la opción deseada: ").strip() # le quitamos espacios demas
-    if opcion == "1":
-        # Pedimos ambos ubicacaiones al usuario, las llevamos a minusculas y quitamos espacios de mas
-        start = input("Ingrese el lugar donde te encuentras (ciudad, pais): ").strip()
-        end = input("Ingrese el lugar donde deseas llegar (ciudad, pais): ").strip()
-        # Validamos que el usauro no entregue vacio
-        if start == "" or end == "":
-            print("Por favor, ingrese lugares válidos.")
-            continue
-        # Validamos que las ubicaciones no son las mismas
-        if start == end:
-            print("El lugar de inicio y destino son iguales. Por favor, ingrese lugares diferentes.")
-            continue
-        # validamos que por lo menos tengan 2 caracteres
-        if len(start) < 2 or len(end) < 2:
-            print("Por favor, ingrese lugares con al menos 2 caracteres.")
-            continue
-
-        if not any(c.isalpha() for c in start) or not any(c.isalpha() for c in end):
-            print("Por favor, ingrese nombres de lugares válidos (deben contener letras).")
-            continue
-        # que diga lo que vamos a calcular
-        print("Calculando la distancia entre", start, "y", end, "...")
-        break
-    # Si quiere salir del programa
-    elif opcion == "2":
-        print("Gracias por usar el programa. ¡Hasta luego!")
-        break
-    # Ponemos esto en caso que no responde no 1 ni 2. 
-    else:
-        print("Opción no válida. Por favor, ingrese una opción válida.")
+import sys
 
 from api import obtener_coordenadas
 
-datos_origen = obtener_coordenadas(start)
-datos_destino = obtener_coordenadas(end)
+# En Windows la consola no usa UTF-8 por defecto y los acentos salen mal.
+sys.stdout.reconfigure(encoding="utf-8")
+
+# Las únicas respuestas que aceptamos para la unidad de medida.
+UNIDADES = {
+    "km": "kilómetros",
+    "kilometros": "kilómetros",
+    "kilómetros": "kilómetros",
+    "millas": "millas",
+    "mi": "millas",
+}
+
+
+def mostrar_bienvenida():
+    """Imprime el título y explica de qué se trata el programa."""
+    print("=====================================")
+    print("   CAMINO A MI CASA")
+    print("=====================================")
+    print("Este programa te ayudará a encontrar la distancia al destino "
+          "deseado desde donde te encuentres.")
+
+
+def mostrar_menu():
+    """Imprime las opciones del menú principal."""
+    print()
+    print("1. Calcular distancia entre dos ciudades")
+    print("2. Salir")
+
+
+def pedir_lugar(etiqueta):
+    """Pide un lugar al usuario y repite la pregunta hasta que sea válido.
+
+    Parámetros:
+        etiqueta (str): lo que se le muestra al usuario, por ejemplo
+                        "Ingrese el lugar donde te encuentras (ciudad, pais)".
+
+    Devuelve:
+        str: el lugar ya limpio, sin espacios de más.
+    """
+    while True:
+        # .strip() le quita los espacios de más a lo que escribió el usuario.
+        lugar = input(f"{etiqueta}: ").strip()
+
+        # Validamos que el usuario no entregue vacío (ni puros espacios).
+        if lugar == "":
+            print("Por favor, ingrese lugares válidos.")
+            continue
+
+        # Validamos que por lo menos tenga 2 caracteres.
+        if len(lugar) < 2:
+            print("Por favor, ingrese lugares con al menos 2 caracteres.")
+            continue
+
+        # Validamos que traiga letras y no solo números o símbolos.
+        if not any(c.isalpha() for c in lugar):
+            print("Por favor, ingrese nombres de lugares válidos "
+                  "(deben contener letras).")
+            continue
+
+        return lugar
+
+
+def pedir_unidad():
+    """Pregunta la unidad preferida y rechaza lo que no sea km o millas.
+
+    Devuelve:
+        str: "kilómetros" o "millas".
+    """
+    while True:
+        respuesta = input("¿En qué unidad quiere ver la distancia "
+                          "(km/millas)?: ").strip().lower()
+
+        if respuesta in UNIDADES:
+            return UNIDADES[respuesta]
+
+        print("Opción no válida. Escriba 'km' o 'millas'.")
+
+
+def mostrar_resumen(origen, destino, unidad):
+    """Imprime el resumen de confirmación antes de consultar la API."""
+    print()
+    print("--- Resumen ---")
+    print(f"Origen:  {origen}")
+    print(f"Destino: {destino}")
+    print(f"Unidad:  {unidad}")
+    print("Consultando datos...")
+
+
+def buscar_lugar(etiqueta, lugar):
+    """Busca un lugar en la API y, si no lo encuentra, vuelve a preguntar.
+
+    Parámetros:
+        etiqueta (str): texto para volver a pedir el lugar si hace falta.
+        lugar (str): el primer intento, lo que ya escribió el usuario.
+
+    Devuelve:
+        dict: los datos del lugar (nombre, pais, lat, lon), o
+        None: si el usuario escribió 'cancelar' para volver al menú.
+    """
+    while True:
+        datos = obtener_coordenadas(lugar)
+
+        # Si todo salió bien, ya terminamos.
+        if datos["ok"]:
+            return datos
+
+        # Aquí llegamos si no se encontró la ciudad o si falló la red.
+        print(f"  -> {datos['mensaje']}")
+        print("     Intente otra vez (o escriba 'cancelar' para volver al menú).")
+
+        lugar = pedir_lugar(etiqueta)
+        if lugar.lower() == "cancelar":
+            return None
+
+
+def mostrar_coordenadas(etiqueta, datos):
+    """Imprime el nombre, el país y las coordenadas de un lugar."""
+    print(f"{etiqueta} {datos['nombre']}, {datos['pais']} "
+          f"→ lat {datos['lat']:.4f}, lon {datos['lon']:.4f}")
+
+
+def calcular_distancia():
+    """Opción 1 del menú: pide los datos y muestra las coordenadas de la API."""
+    print()
+    inicio = pedir_lugar("Ingrese el lugar donde te encuentras (ciudad, pais)")
+    final = pedir_lugar("Ingrese el lugar donde deseas llegar (ciudad, pais)")
+
+    # Validamos que las ubicaciones no sean las mismas.
+    if inicio.lower() == final.lower():
+        print("El lugar de inicio y destino son iguales. "
+              "Por favor, ingrese lugares diferentes.")
+        return
+
+    unidad = pedir_unidad()
+
+    # Resumen de confirmación antes de salir a internet.
+    mostrar_resumen(inicio, final, unidad)
+
+    # Paso 5: buscamos las coordenadas de cada lugar con la API.
+    datos_origen = buscar_lugar("Ingrese el lugar donde te encuentras (ciudad, pais)",
+                                inicio)
+    if datos_origen is None:
+        return
+
+    datos_destino = buscar_lugar("Ingrese el lugar donde deseas llegar (ciudad, pais)",
+                                 final)
+    if datos_destino is None:
+        return
+
+    print()
+    mostrar_coordenadas("Origen: ", datos_origen)
+    mostrar_coordenadas("Destino:", datos_destino)
+
+    # Pendiente (utils.py): calcular la distancia con la fórmula de Haversine
+    # y los tiempos de viaje en avión y en auto.
+    print(f"(La distancia en {unidad} se calculará en el siguiente paso.)")
+
+
+def main():
+    """Programa principal: el menú se repite hasta que el usuario elige salir."""
+    mostrar_bienvenida()
+
+    while True:
+        mostrar_menu()
+        # Le quitamos los espacios de más a la opción elegida.
+        opcion = input("Ingrese la opción deseada: ").strip()
+
+        if opcion == "1":
+            calcular_distancia()
+        elif opcion == "2":
+            # Si quiere salir del programa.
+            print("Gracias por usar el programa. ¡Hasta luego!")
+            break
+        else:
+            # Esto es por si no responde ni 1 ni 2.
+            print("Opción no válida. Por favor, ingrese una opción válida.")
+
+
+# El menú solo corre cuando ejecutamos main.py directamente.
+if __name__ == "__main__":
+    main()

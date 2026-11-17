@@ -1,0 +1,6 @@
+{
+  // En esta computadora hay varios Python instalados y solo este tiene
+  // instalada la libreria requests. Asi el boton Play siempre usa el correcto.
+  "python.defaultInterpreterPath": "C:\Users\edore\AppData\Local\Python\pythoncore-3.14-64\python.exe",
+  "python.terminal.executeInFileDir": false
+}
