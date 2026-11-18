@@ -1,2 +1,5 @@
 __pycache__/
 *.pyc
+
+# El caché de coordenadas se genera solo al correr el programa.
+data/

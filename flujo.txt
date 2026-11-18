@@ -1,0 +1,39 @@
+Usuario escribe "Layton, Estados Unidos"
+            │
+            ▼
+┌───────────────────────────────────────────────────────────┐
+│ api.py                                                    │
+│                                                           │
+│ 1. normalizar_llave()                                     │
+│    "  LAYTON , Estados Unídos" → "layton, estados unidos" │
+│       (minúsculas · sin espacios de más · sin acentos)    │
+│            │                                              │
+│            ▼                                              │
+│ 2. cargar_cache()  ←── data/coordenadas_cache.json        │
+│            │                                              │
+│            ├── ¿la llave ya está guardada?                │
+│            │      └─► SÍ ─► devuelve las coordenadas      │
+│            │                desde_cache = True            │
+│            │                (0 ms de red)                 │
+│            │                                              │
+│            └── ¿no está?                                  │
+│                   │                                       │
+│                   ▼                                       │
+│ 3. requests.get() ──► Open-Meteo                          │
+│                   │                                       │
+│                   ├── ¿respondió bien?                    │
+│                   │      └─► guardar_cache()  ← se agrega │
+│                   │          devuelve las coordenadas     │
+│                   │          desde_cache = False          │
+│                   │                                       │
+│                   └── ¿falló? (sin internet, no existe,   │
+│                   │            timeout, formato malo)     │
+│                          └─► {"ok": False, "mensaje": …}  │
+│                              NO se guarda nada en el JSON │
+└───────────────────────────────────────────────────────────┘
+            │
+            ▼
+main.py imprime el resultado
+(le agrega "(desde el caché)" si desde_cache era True)
+
+Design: Claude

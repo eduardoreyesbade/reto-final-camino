@@ -32,7 +32,7 @@ def mostrar_bienvenida():
     print("   CAMINO A MI CASA")
     print("=====================================")
     print("Este programa te ayudará a encontrar la distancia al destino "
-          "deseado desde donde te encuentres.")
+          "deseado entre dos puntos gerograficos.")
 
 
 def mostrar_menu():
@@ -43,14 +43,9 @@ def mostrar_menu():
 
 
 def pedir_lugar(etiqueta):
-    """Pide un lugar al usuario y repite la pregunta hasta que sea válido.
+    """
+    Pide un lugar al usuario y repite la pregunta hasta que sea válido.
 
-    Parámetros:
-        etiqueta (str): lo que se le muestra al usuario, por ejemplo
-                        "Ingrese el lugar donde te encuentras (ciudad, pais)".
-
-    Devuelve:
-        str: el lugar ya limpio, sin espacios de más.
     """
     while True:
         # .strip() le quita los espacios de más a lo que escribió el usuario.
@@ -66,31 +61,25 @@ def pedir_lugar(etiqueta):
             print("Por favor, ingrese lugares con al menos 2 caracteres.")
             continue
 
-        # Validamos que traiga letras y no solo números o símbolos.
-        if not any(c.isalpha() for c in lugar):
-            print("Por favor, ingrese nombres de lugares válidos "
-                  "(deben contener letras).")
-            continue
-
         return lugar
 
 
 def pedir_unidad():
-    """Pregunta la unidad preferida y rechaza lo que no sea km o millas.
+    """
+    Pregunta la unidad preferida y rechaza lo que no sea km o millas.
 
-    Devuelve:
-        str: "kilómetros" o "millas".
     """
     while True:
         respuesta = input("¿En qué unidad quiere ver la distancia "
                           "(km/millas)?: ").strip().lower()
-
+        # nos aseguram,os que la respuesta esté en el diccionario de UNIDADES que esta al niicio y devolvemos el valor
         if respuesta in UNIDADES:
             return UNIDADES[respuesta]
-
+        # por si escribe otra cosa, le decimos que no es válido y vuelve a preguntar
         print("Opción no válida. Escriba 'km' o 'millas'.")
 
 
+# Esto permite confirmar visualmente la informacion entregada por el usuario antes de hacer la consulta a la API.
 def mostrar_resumen(origen, destino, unidad):
     """Imprime el resumen de confirmación antes de consultar la API."""
     print()
@@ -102,15 +91,9 @@ def mostrar_resumen(origen, destino, unidad):
 
 
 def buscar_lugar(etiqueta, lugar):
-    """Busca un lugar en la API y, si no lo encuentra, vuelve a preguntar.
+    """
+    Busca un lugar en la API y, si no lo encuentra, vuelve a preguntar.
 
-    Parámetros:
-        etiqueta (str): texto para volver a pedir el lugar si hace falta.
-        lugar (str): el primer intento, lo que ya escribió el usuario.
-
-    Devuelve:
-        dict: los datos del lugar (nombre, pais, lat, lon), o
-        None: si el usuario escribió 'cancelar' para volver al menú.
     """
     while True:
         datos = obtener_coordenadas(lugar)
@@ -130,8 +113,15 @@ def buscar_lugar(etiqueta, lugar):
 
 def mostrar_coordenadas(etiqueta, datos):
     """Imprime el nombre, el país y las coordenadas de un lugar."""
+    # Si el dato venía guardado de una búsqueda anterior, se lo avisamos
+    # al usuario para que sepa por qué fue tan rápido.
+    if datos.get("desde_cache"):
+        origen = "  (desde el caché)"
+    else:
+        origen = ""
+
     print(f"{etiqueta} {datos['nombre']}, {datos['pais']} "
-          f"→ lat {datos['lat']:.4f}, lon {datos['lon']:.4f}")
+          f"→ lat {datos['lat']:.4f}, lon {datos['lon']:.4f}{origen}")
 
 
 def calcular_distancia():

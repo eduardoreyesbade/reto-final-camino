@@ -2,30 +2,50 @@
 # Reto Final - "Camino a mi casa" (CS1400)
 # Archivo: api.py  -> Funciones que consumen las APIs
 # Paso 5: Conexión con la API de Geocodificación (Open-Meteo)
+# Extensión: caché local para no repetir consultas (ver cache.py)
 # Integrantes: Tito Huerta y Eduardo Reyes
-# Actualizadd: 17 de noviembre de 2026
+# Actualizado: 17 de noviembre de 2026
 # ============================================================
 # Privacidad: aquí solo viajan nombres de CIUDAD y PAÍS.
 # Nunca direcciones exactas, ni en el código ni en GitHub.
 
+import unicodedata
+
 import requests
+
+# Para hacer el caché de las consultas y no repetirlas,
+# importamos las funciones de cache.py.
+from cache import cargar_cache, guardar_cache
 
 # La API de Open-Meteo es gratis y no pide API key.
 URL_GEOCODING = "https://geocoding-api.open-meteo.com/v1/search"
 
 
-def buscar_ubicacion(lugar):
-    """Recibe 'ciudad, país' y devuelve la respuesta completa de Open-Meteo.
+def normalizar_llave(lugar):
+    """Convierte lo que escribió el usuario en una llave única para el caché.
+
+    "Ogden, Estados Unidos", "  OGDEN ,estados unidos" y "Ogden, Estados
+    Unídos" tienen que dar la MISMA llave; si no, el caché casi nunca acierta.
 
     Parámetros:
-        lugar (str): texto que escribió el usuario, por ejemplo "Ogden, Estados Unidos".
+        lugar (str): el texto tal cual lo escribió el usuario.
 
     Devuelve:
-        dict: el JSON que mandó la API (puede traer la lista 'results' o venir vacío).
+        str: la llave en minúsculas, sin espacios de más y sin acentos.
+    """
+    ciudad, _, pais = lugar.partition(",")
+    texto = f"{ciudad.strip()}, {pais.strip()}".lower()
 
-    Puede lanzar:
-        ValueError: si el texto no trae ciudad y país separados por coma.
-        requests.exceptions.RequestException: si falla la red o el código de estado.
+    # NFD separa cada letra de su acento ("á" pasa a ser "a" + "´") y después
+    # nos quedamos solo con los caracteres que NO son acentos.
+    descompuesto = unicodedata.normalize("NFD", texto)
+    return "".join(c for c in descompuesto if not unicodedata.combining(c))
+
+
+def buscar_ubicacion(lugar):
+    """
+    Recibe 'ciudad, país' y devuelve la respuesta completa de Open-Meteo web API.
+
     """
     # Paso 2: separamos la ciudad y el país usando la primera coma.
     ciudad, separador, pais = lugar.partition(",")
@@ -54,24 +74,19 @@ def buscar_ubicacion(lugar):
 
 
 def obtener_coordenadas(lugar):
-    """Busca un lugar y devuelve sus coordenadas listas para usar.
-
-    Esta es la función que llama main.py. Se apoya en buscar_ubicacion() y se
-    encarga de atrapar todos los errores para que el programa NO se cierre.
-
-    Parámetros:
-        lugar (str): "ciudad, país" escrito por el usuario.
-
-    Devuelve:
-        dict: siempre un diccionario.
-            Si todo salió bien:
-                {"ok": True, "nombre": str, "pais": str, "lat": float, "lon": float}
-            Si hubo un problema:
-                {"ok": False, "mensaje": str}  -> el mensaje se le muestra al usuario
-
-    Importante: esta función devuelve los datos, no los imprime. Quien decide
-    cómo mostrarlos es main.py.
     """
+    Busca un lugar y devuelve sus coordenadas listas para usar.
+    """
+    llave = normalizar_llave(lugar)
+    cache = cargar_cache()
+
+    # ¿Ya lo habíamos buscado antes? Entonces ni tocamos la red.
+    if llave in cache:
+        # dict() hace una copia, para no modificar lo que está guardado.
+        guardado = dict(cache[llave])
+        guardado["desde_cache"] = True
+        return guardado
+
     try:
         datos = buscar_ubicacion(lugar)
 
@@ -104,10 +119,19 @@ def obtener_coordenadas(lugar):
     # Si hay varias coincidencias, usamos la primera (la más relevante).
     lugar_encontrado = resultados[0]
 
-    return {
+    resultado = {
         "ok": True,
         "nombre": lugar_encontrado.get("name", lugar),
         "pais": lugar_encontrado.get("country", "Desconocido"),
         "lat": lugar_encontrado.get("latitude"),
         "lon": lugar_encontrado.get("longitude"),
     }
+
+    # Lo guardamos para la próxima vez.
+    cache[llave] = resultado
+    guardar_cache(cache)
+
+    # Copia otra vez, para que "desde_cache" no termine dentro del archivo.
+    nuevo = dict(resultado)
+    nuevo["desde_cache"] = False
+    return nuevo

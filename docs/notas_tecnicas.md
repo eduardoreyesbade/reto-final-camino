@@ -39,3 +39,60 @@ computadora, no del proyecto: en otras máquinas el código corre tal cual.
 
 En Windows la consola no usa UTF-8 por defecto, por eso `main.py` y
 `pruebas_api.py` empiezan con `sys.stdout.reconfigure(encoding="utf-8")`.
+
+## Flujo del caché de coordenadas
+
+Extensión: el programa recuerda las ciudades que ya buscó, en
+`data/coordenadas_cache.json`. Vive dentro de `api.py`, así que `main.py` no se
+entera: sigue llamando solo a `obtener_coordenadas()`.
+
+```
+Usuario escribe "Layton, Estados Unidos"
+            │
+            ▼
+┌───────────────────────────────────────────────────────────┐
+│ api.py                                                    │
+│                                                           │
+│ 1. normalizar_llave()                                     │
+│    "  LAYTON , Estados Unídos" → "layton, estados unidos" │
+│       (minúsculas · sin espacios de más · sin acentos)    │
+│            │                                              │
+│            ▼                                              │
+│ 2. cargar_cache()  ←── data/coordenadas_cache.json        │
+│            │                                              │
+│            ├── ¿la llave ya está guardada?                │
+│            │      └─► SÍ ─► devuelve las coordenadas      │
+│            │                desde_cache = True            │
+│            │                (0 ms de red)                 │
+│            │                                              │
+│            └── ¿no está?                                  │
+│                   │                                       │
+│                   ▼                                       │
+│ 3. requests.get() ──► Open-Meteo                          │
+│                   │                                       │
+│                   ├── ¿respondió bien?                    │
+│                   │      └─► guardar_cache()  ← se agrega │
+│                   │          devuelve las coordenadas     │
+│                   │          desde_cache = False          │
+│                   │                                       │
+│                   └── ¿falló? (sin internet, no existe,   │
+│                   │            timeout, formato malo)     │
+│                          └─► {"ok": False, "mensaje": …}  │
+│                              NO se guarda nada en el JSON │
+└───────────────────────────────────────────────────────────┘
+            │
+            ▼
+main.py imprime el resultado
+(le agrega "(desde el caché)" si desde_cache era True)
+```
+
+Dos decisiones que vale la pena explicar:
+
+- **Solo se guardan las búsquedas exitosas.** Si guardáramos los errores, el
+  programa "recordaría" que una ciudad no existe nada más porque ese día no
+  había internet, y seguiría diciéndolo después.
+- **La llave va normalizada.** `"Madrid, España"`, `"  MADRID ,espana"` y
+  `"Madrid,Espana"` dan la misma llave `madrid, espana`. Sin esto el caché casi
+  nunca acertaría, porque cada usuario escribe distinto.
+
+El archivo `data/` está en `.gitignore`: se genera solo al correr el programa.
