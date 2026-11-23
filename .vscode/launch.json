@@ -11,11 +11,11 @@
       "console": "integratedTerminal"
     },
     {
-      // Corre las pruebas de la API (para las capturas de pantalla).
-      "name": "Pruebas de la API (pruebas_api.py)",
+      // Corre la prueba de la clase Ciudad (para las capturas del Paso 7).
+      "name": "Clase Ciudad (ciudad.py)",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/pruebas_api.py",
+      "program": "${workspaceFolder}/ciudad.py",
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal"
     },

@@ -13,6 +13,13 @@ import sys
 
 from api import obtener_coordenadas
 
+# traemos de utils los datos para calcualar la distancia y el tiempo de viaje. 
+
+from utils import calcular_distancia, km_a_millas, calcular_tiempo, formatear_tiempo
+
+VELOCIDAD_AVION = 800   # km/h, velocidad crucero aproximada de un avión comercial
+VELOCIDAD_AUTO = 80     # km/h, promedio razonable en carretera
+
 # En Windows la consola no usa UTF-8 por defecto y los acentos salen mal.
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -24,7 +31,6 @@ UNIDADES = {
     "millas": "millas",
     "mi": "millas",
 }
-
 
 def mostrar_bienvenida():
     """Imprime el título y explica de qué se trata el programa."""
@@ -41,27 +47,78 @@ def mostrar_menu():
     print("1. Calcular distancia entre dos ciudades")
     print("2. Salir")
 
-
-def pedir_lugar(etiqueta):
+# Usamos dos funciones separadas para pedir el origen y el destino,
+# para que cada una sea clara y específica.
+def pedir_origen(etiqueta):
     """
-    Pide un lugar al usuario y repite la pregunta hasta que sea válido.
+    Pide el lugar de ORIGEN y repite la pregunta hasta que sea válido.
 
+    Parámetros:
+        etiqueta (str): el texto que se le muestra al usuario.
+
+    Devuelve:
+        str: el lugar escrito con el formato "ciudad, país".
     """
     while True:
         # .strip() le quita los espacios de más a lo que escribió el usuario.
-        lugar = input(f"{etiqueta}: ").strip()
+        origen = input(f"{etiqueta}: ").strip()
 
         # Validamos que el usuario no entregue vacío (ni puros espacios).
-        if lugar == "":
+        if origen == "":
             print("Por favor, ingrese lugares válidos.")
             continue
 
         # Validamos que por lo menos tenga 2 caracteres.
-        if len(lugar) < 2:
+        if len(origen) < 2:
             print("Por favor, ingrese lugares con al menos 2 caracteres.")
             continue
 
-        return lugar
+        # Validamos el formato "ciudad, país" ANTES de gastar una consulta a
+        # internet: tiene que haber una coma y algo escrito a cada lado.
+        ciudad, separador, pais = origen.partition(",")
+        if not separador or not ciudad.strip() or not pais.strip():
+            print("Use el formato: ciudad, país. "
+                  "Ejemplo: Ogden, Estados Unidos")
+            continue
+
+        return origen
+
+
+# Esta función es igual que pedir_origen, pero para el destino.
+# Si cambias la validación en una, cámbiala también en la otra.
+def pedir_destino(etiqueta):
+    """
+    Pide el lugar de DESTINO y repite la pregunta hasta que sea válido.
+
+    Parámetros:
+        etiqueta (str): el texto que se le muestra al usuario.
+
+    Devuelve:
+        str: el lugar escrito con el formato "ciudad, país".
+    """
+    while True:
+        # .strip() le quita los espacios de más a lo que escribió el usuario.
+        destino = input(f"{etiqueta}: ").strip()
+
+        # Validamos que el usuario no entregue vacío (ni puros espacios).
+        if destino == "":
+            print("Por favor, ingrese lugares válidos.")
+            continue
+
+        # Validamos que por lo menos tenga 2 caracteres.
+        if len(destino) < 2:
+            print("Por favor, ingrese lugares con al menos 2 caracteres.")
+            continue
+
+        # Validamos el formato "ciudad, país" ANTES de gastar una consulta a
+        # internet: tiene que haber una coma y algo escrito a cada lado.
+        ciudad, separador, pais = destino.partition(",")
+        if not separador or not ciudad.strip() or not pais.strip():
+            print("Use el formato: ciudad, país. "
+                  "Ejemplo: Santiago, Chile")
+            continue
+
+        return destino
 
 
 def pedir_unidad():
@@ -89,28 +146,6 @@ def mostrar_resumen(origen, destino, unidad):
     print(f"Unidad:  {unidad}")
     print("Consultando datos...")
 
-
-def buscar_lugar(etiqueta, lugar):
-    """
-    Busca un lugar en la API y, si no lo encuentra, vuelve a preguntar.
-
-    """
-    while True:
-        datos = obtener_coordenadas(lugar)
-
-        # Si todo salió bien, ya terminamos.
-        if datos["ok"]:
-            return datos
-
-        # Aquí llegamos si no se encontró la ciudad o si falló la red.
-        print(f"  -> {datos['mensaje']}")
-        print("     Intente otra vez (o escriba 'cancelar' para volver al menú).")
-
-        lugar = pedir_lugar(etiqueta)
-        if lugar.lower() == "cancelar":
-            return None
-
-
 def mostrar_coordenadas(etiqueta, datos):
     """Imprime el nombre, el país y las coordenadas de un lugar."""
     # Si el dato venía guardado de una búsqueda anterior, se lo avisamos
@@ -124,11 +159,49 @@ def mostrar_coordenadas(etiqueta, datos):
           f"→ lat {datos['lat']:.4f}, lon {datos['lon']:.4f}{origen}")
 
 
-def calcular_distancia():
-    """Opción 1 del menú: pide los datos y muestra las coordenadas de la API."""
+def mostrar_resultado(origen, destino, km, millas, tiempo_avion, tiempo_auto, unidad):
+    """
+    Imprime el resumen final del viaje ya calculado.
+
+    Muestra primero la unidad que el usuario eligió y la otra entre paréntesis.
+
+    Parámetros:
+        origen, destino (dict): los datos que devolvió la API.
+        km, millas (float): la distancia en cada unidad.
+        tiempo_avion, tiempo_auto (str): los tiempos ya con formato "X h Y min".
+        unidad (str): "kilómetros" o "millas", lo que el usuario prefirió.
+    """
+    # El :,.2f pone el separador de miles y deja dos decimales (3,478.52).
+    if unidad == "millas":
+        distancia = f"{millas:,.2f} millas  ({km:,.2f} km)"
+    else:
+        distancia = f"{km:,.2f} km  ({millas:,.2f} millas)"
+
     print()
-    inicio = pedir_lugar("Ingrese el lugar donde te encuentras (ciudad, pais)")
-    final = pedir_lugar("Ingrese el lugar donde deseas llegar (ciudad, pais)")
+    print("========== RESUMEN DEL VIAJE ==========")
+    print(f"Origen:   {origen['nombre']}, {origen['pais']}  "
+          f"({origen['lat']:.4f}, {origen['lon']:.4f})")
+    print(f"Destino:  {destino['nombre']}, {destino['pais']}  "
+          f"({destino['lat']:.4f}, {destino['lon']:.4f})")
+    print()
+    print(f"Distancia en línea recta: {distancia}")
+    print()
+    print(f"Tiempo estimado en avión ({VELOCIDAD_AVION} km/h):  {tiempo_avion}")
+    print(f"Tiempo estimado en auto  ({VELOCIDAD_AUTO} km/h):   {tiempo_auto}")
+    print()
+    print("* La distancia es una aproximación en línea recta, no por carretera.")
+    print("=======================================")
+
+
+def procesar_viaje():
+    """
+    Opción 1 del menú: pide los lugares, consulta la API y muestra el viaje.
+
+    Si la ciudad no existe o falla la red, avisa y regresa al menú.
+    """
+    print()
+    inicio = pedir_origen("Ingrese el lugar donde te encuentras (ciudad, pais)")
+    final = pedir_destino("Ingrese el lugar donde deseas llegar (ciudad, pais)")
 
     # Validamos que las ubicaciones no sean las mismas.
     if inicio.lower() == final.lower():
@@ -142,23 +215,36 @@ def calcular_distancia():
     mostrar_resumen(inicio, final, unidad)
 
     # Paso 5: buscamos las coordenadas de cada lugar con la API.
-    datos_origen = buscar_lugar("Ingrese el lugar donde te encuentras (ciudad, pais)",
-                                inicio)
-    if datos_origen is None:
+    # Un fallo de red lanza ConnectionError; lo avisamos y volvemos al menú.
+    try:
+        datos_origen = obtener_coordenadas(inicio)
+        datos_destino = obtener_coordenadas(final)
+    except ConnectionError as error:
+        print(f"  -> Error de red: {error}")
         return
 
-    datos_destino = buscar_lugar("Ingrese el lugar donde deseas llegar (ciudad, pais)",
-                                 final)
+    # obtener_coordenadas devuelve None cuando no encuentra la ciudad.
+    if datos_origen is None:
+        print(f"  -> Ciudad no encontrada: {inicio}")
+        return
+
     if datos_destino is None:
+        print(f"  -> Ciudad no encontrada: {final}")
         return
 
     print()
     mostrar_coordenadas("Origen: ", datos_origen)
     mostrar_coordenadas("Destino:", datos_destino)
 
-    # Pendiente (utils.py): calcular la distancia con la fórmula de Haversine
-    # y los tiempos de viaje en avión y en auto.
-    print(f"(La distancia en {unidad} se calculará en el siguiente paso.)")
+    # Paso 6: ahora sí, los cálculos con las funciones de utils.py.
+    km = calcular_distancia(datos_origen["lat"], datos_origen["lon"],
+                            datos_destino["lat"], datos_destino["lon"])
+    millas = km_a_millas(km)
+    tiempo_avion = formatear_tiempo(calcular_tiempo(km, VELOCIDAD_AVION))
+    tiempo_auto = formatear_tiempo(calcular_tiempo(km, VELOCIDAD_AUTO))
+
+    mostrar_resultado(datos_origen, datos_destino, km, millas,
+                      tiempo_avion, tiempo_auto, unidad)
 
 
 def main():
@@ -171,7 +257,7 @@ def main():
         opcion = input("Ingrese la opción deseada: ").strip()
 
         if opcion == "1":
-            calcular_distancia()
+            procesar_viaje()
         elif opcion == "2":
             # Si quiere salir del programa.
             print("Gracias por usar el programa. ¡Hasta luego!")

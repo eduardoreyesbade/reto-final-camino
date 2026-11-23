@@ -76,6 +76,17 @@ def buscar_ubicacion(lugar):
 def obtener_coordenadas(lugar):
     """
     Busca un lugar y devuelve sus coordenadas listas para usar.
+
+    Parámetros:
+        lugar (str): el texto con formato "ciudad, país".
+
+    Devuelve:
+        dict: con nombre, pais, lat, lon y desde_cache, si lo encuentra.
+        None: si la ciudad no existe o el formato no es "ciudad, país".
+
+    Lanza:
+        ConnectionError: si falla la red (sin internet, timeout o
+                         respuesta inválida de la API).
     """
     llave = normalizar_llave(lugar)
     cache = cargar_cache()
@@ -84,13 +95,15 @@ def obtener_coordenadas(lugar):
     if llave in cache:
         # dict() hace una copia, para no modificar lo que está guardado.
         guardado = dict(cache[llave])
+        guardado["desde_cache"] = True
         return guardado
 
+    # OJO con el ORDEN de los except: los de requests van ANTES que ValueError,
+    # porque requests.exceptions.JSONDecodeError también es un ValueError.
+    # Una respuesta rota de la API es un problema de RED, no un error de
+    # formato del usuario, y tiene que salir como ConnectionError.
     try:
         datos = buscar_ubicacion(lugar)
-
-    except ValueError as error:
-        return None
 
     except requests.exceptions.Timeout:
         # La API tardó más de 10 segundos en contestar.
@@ -101,8 +114,13 @@ def obtener_coordenadas(lugar):
         raise ConnectionError("La API respondió con un código inesperado.")
 
     except requests.exceptions.RequestException:
-        # Sin internet, wifi apagado u otro error de red.
+        # Sin internet, wifi apagado o una respuesta que no es JSON válido.
         raise ConnectionError("No se pudo conectar. Revisa tu internet.")
+
+    except ValueError:
+        # El usuario no escribió el formato "ciudad, país".
+        # main.py ya lo valida antes de llegar aquí; esto es la red de seguridad.
+        return None
 
     # Ojo: la API contesta 200 aunque no encuentre nada; en ese caso no hay 'results'.
     resultados = datos.get("results")

@@ -5,9 +5,9 @@
 | Paso | Qué pedía | Dónde quedó |
 |---|---|---|
 | Paso 4 | Menú, validaciones, unidad y resumen | `main.py` |
-| Paso 5 | API de geocodificación Open-Meteo | `api.py` (+ `pruebas_api.py`) |
-| Siguiente | Distancia (Haversine) y tiempos | `utils.py` (pendiente) |
-| 21 nov | Clase `Ciudad` (POO) | `ciudad.py` (pendiente) |
+| Paso 5 | API de geocodificación Open-Meteo | `api.py` |
+| Paso 6 | Distancia (Haversine), tiempos y MVP | `utils.py`, `main.py` |
+| Paso 7 | Clase `Ciudad` (POO) | `ciudad.py` |
 
 ## Casos de prueba de la API
 
@@ -18,7 +18,7 @@
 | Sin internet (wifi apagado) | "No se pudo conectar con la API…" y el programa sigue vivo |
 | Falta el país (`Madrid`) | Avisa del formato "ciudad, país" |
 
-Para correrlos: `python pruebas_api.py`
+Para correrlos: desde el menú de `main.py`, opción 1.
 
 ## Error de certificado SSL (solo en la computadora de Eduardo)
 
@@ -37,8 +37,8 @@ computadora, no del proyecto: en otras máquinas el código corre tal cual.
 
 ## Nota sobre acentos
 
-En Windows la consola no usa UTF-8 por defecto, por eso `main.py` y
-`pruebas_api.py` empiezan con `sys.stdout.reconfigure(encoding="utf-8")`.
+En Windows la consola no usa UTF-8 por defecto, por eso `main.py` empieza
+con `sys.stdout.reconfigure(encoding="utf-8")`.
 
 ## Flujo del caché de coordenadas
 

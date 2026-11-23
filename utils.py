@@ -8,6 +8,8 @@
 # Fecha: 23 de noviembre de 2026
 # ============================================================
 """
+Este doc es bueno porque tiene todos los calculos de distancia y tiempo, y no depende de input() ni print() [esto viene de main.py]
+
 utils.py - Funciones de cálculo (distancia, conversiones y tiempos).
 
 No usa input() ni print() (salvo en el bloque de prueba al final).
@@ -27,6 +29,7 @@ def calcular_distancia(lat1, lon1, lat2, lon2):
 
     Parámetros: latitud y longitud de cada punto, en grados.
     Devuelve: distancia en kilómetros (float).
+
     """
     # La fórmula necesita los ángulos en radianes
     lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
@@ -41,11 +44,13 @@ def calcular_distancia(lat1, lon1, lat2, lon2):
 
 def km_a_millas(km):
     """Convierte kilómetros a millas."""
+    # es un converión directa, no hay que redondear ni nada más
     return km * KM_A_MILLAS
 
 
 def calcular_tiempo(distancia_km, velocidad_kmh):
     """Devuelve el tiempo en horas decimales: tiempo = distancia / velocidad."""
+    # este es para calcular el tiempo de viaje en horas decimales, no hay que redondear ni nada más
     return distancia_km / velocidad_kmh
 
 
