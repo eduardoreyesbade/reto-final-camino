@@ -4,7 +4,7 @@
 # Paso 5: Conexión con la API de Geocodificación (Open-Meteo)
 # Extensión: caché local para no repetir consultas (ver cache.py)
 # Integrantes: Tito Huerta y Eduardo Reyes
-# Actualizado: 17 de noviembre de 2026
+# Actualizado: 23 de noviembre de 2026 (Updated)
 # ============================================================
 # Privacidad: aquí solo viajan nombres de CIUDAD y PAÍS.
 # Nunca direcciones exactas, ni en el código ni en GitHub.
@@ -84,43 +84,35 @@ def obtener_coordenadas(lugar):
     if llave in cache:
         # dict() hace una copia, para no modificar lo que está guardado.
         guardado = dict(cache[llave])
-        guardado["desde_cache"] = True
         return guardado
 
     try:
         datos = buscar_ubicacion(lugar)
 
     except ValueError as error:
-        # El usuario no escribió el formato "ciudad, país"
-        # (o la API devolvió algo que no es JSON).
-        return {"ok": False, "mensaje": str(error)}
+        return None
 
     except requests.exceptions.Timeout:
         # La API tardó más de 10 segundos en contestar.
-        return {"ok": False,
-                "mensaje": "La API tardó demasiado en responder. Intenta de nuevo."}
+        raise ConnectionError("La API tardó demasiado en responder.")
 
     except requests.exceptions.HTTPError:
         # Respuesta inesperada: un código de estado distinto de 200.
-        return {"ok": False,
-                "mensaje": "La API respondió con un código de estado inesperado."}
+        raise ConnectionError("La API respondió con un código inesperado.")
 
     except requests.exceptions.RequestException:
         # Sin internet, wifi apagado u otro error de red.
-        return {"ok": False,
-                "mensaje": "No se pudo conectar con la API. Revisa tu internet."}
+        raise ConnectionError("No se pudo conectar. Revisa tu internet.")
 
     # Ojo: la API contesta 200 aunque no encuentre nada; en ese caso no hay 'results'.
     resultados = datos.get("results")
     if not resultados:
-        return {"ok": False,
-                "mensaje": f"No encontramos '{lugar}'. Revisa cómo lo escribiste."}
+        return None
 
     # Si hay varias coincidencias, usamos la primera (la más relevante).
     lugar_encontrado = resultados[0]
 
     resultado = {
-        "ok": True,
         "nombre": lugar_encontrado.get("name", lugar),
         "pais": lugar_encontrado.get("country", "Desconocido"),
         "lat": lugar_encontrado.get("latitude"),

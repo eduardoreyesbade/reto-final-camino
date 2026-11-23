@@ -4,7 +4,7 @@
 # Paso 4: Entrada, salida y formato base (input / print)
 # Paso 5: Llama a api.py para obtener las coordenadas
 # Integrantes: Tito Huerta y Eduardo Reyes
-# Fecha: 17 de noviembre de 2026
+# Fecha: 23 de noviembre de 2026 (Updated)
 # ============================================================
 # Privacidad: al usuario solo se le piden CIUDAD y PAÍS.
 # Nunca direcciones exactas, ni en el código ni en GitHub.

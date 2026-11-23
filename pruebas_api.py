@@ -2,7 +2,7 @@
 # Reto Final - "Camino a mi casa" (CS1400)
 # Archivo: pruebas_api.py -> Pruebas manuales de la API (Paso 5)
 # Integrantes: Tito Huerta y Eduardo Reyes
-# Fecha: 17 de noviembre de 2026
+# Fecha: 23 de noviembre de 2026 (Updated)
 # ============================================================
 # Cómo usarlo:  python pruebas_api.py
 # Sirve para la captura de pantalla de los casos de prueba.
@@ -20,11 +20,15 @@ def probar(titulo, lugar):
     print(f"\n--- {titulo} ---")
     datos = obtener_coordenadas(lugar)
 
-    if datos["ok"]:
-        print(f"OK: {datos['nombre']}, {datos['pais']} "
-              f"→ lat {datos['lat']:.4f}, lon {datos['lon']:.4f}")
-    else:
-        print(f"AVISO: {datos['mensaje']}")
+    try:
+        datos = obtener_coordenadas(lugar)
+        if datos == None:
+            print("Ciudad no encontrada")
+        else:
+            print(f"OK: {datos['nombre']}, {datos['pais']} "
+                  f"→ lat {datos['lat']:.4f}, lon {datos['lon']:.4f}")
+    except ConnectionError as e:
+        print(f"Error de red: {e}")
 
 
 print("[PRUEBAS] Probando obtener_coordenadas()...")
