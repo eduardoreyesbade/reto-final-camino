@@ -3,6 +3,8 @@
 # Archivo: main.py  -> Menú y flujo principal
 # Paso 4: Entrada, salida y formato base (input / print)
 # Paso 5: Llama a api.py para obtener las coordenadas
+# Paso 6: Calcula la distancia y los tiempos, y muestra el resumen
+# Paso 7: Usa objetos Ciudad en vez de diccionarios sueltos (POO)
 # Integrantes: Tito Huerta y Eduardo Reyes
 # Fecha: 23 de noviembre de 2026 (Updated)
 # ============================================================
@@ -13,9 +15,12 @@ import sys
 
 from api import obtener_coordenadas
 
-# traemos de utils los datos para calcualar la distancia y el tiempo de viaje. 
+# Paso 7: la clase que agrupa los datos de una ciudad y sus acciones.
+from ciudad import Ciudad
 
-from utils import calcular_distancia, km_a_millas, calcular_tiempo, formatear_tiempo
+# De utils traemos las funciones de calculo. Ya no importamos
+# calcular_distancia: ahora se llama a traves de Ciudad.distancia_a().
+from utils import km_a_millas, calcular_tiempo, formatear_tiempo
 
 VELOCIDAD_AVION = 800   # km/h, velocidad crucero aproximada de un avión comercial
 VELOCIDAD_AUTO = 80     # km/h, promedio razonable en carretera
@@ -166,7 +171,7 @@ def mostrar_resultado(origen, destino, km, millas, tiempo_avion, tiempo_auto, un
     Muestra primero la unidad que el usuario eligió y la otra entre paréntesis.
 
     Parámetros:
-        origen, destino (dict): los datos que devolvió la API.
+        origen, destino (Ciudad): los objetos Ciudad del viaje.
         km, millas (float): la distancia en cada unidad.
         tiempo_avion, tiempo_auto (str): los tiempos ya con formato "X h Y min".
         unidad (str): "kilómetros" o "millas", lo que el usuario prefirió.
@@ -177,12 +182,14 @@ def mostrar_resultado(origen, destino, km, millas, tiempo_avion, tiempo_auto, un
     else:
         distancia = f"{km:,.2f} km  ({millas:,.2f} millas)"
 
+    # Paso 7: ahora leemos los ATRIBUTOS del objeto (origen.nombre) en vez
+    # de las llaves de un diccionario (origen["nombre"]).
     print()
     print("========== RESUMEN DEL VIAJE ==========")
-    print(f"Origen:   {origen['nombre']}, {origen['pais']}  "
-          f"({origen['lat']:.4f}, {origen['lon']:.4f})")
-    print(f"Destino:  {destino['nombre']}, {destino['pais']}  "
-          f"({destino['lat']:.4f}, {destino['lon']:.4f})")
+    print(f"Origen:   {origen.nombre}, {origen.pais}  "
+          f"({origen.latitud:.4f}, {origen.longitud:.4f})")
+    print(f"Destino:  {destino.nombre}, {destino.pais}  "
+          f"({destino.latitud:.4f}, {destino.longitud:.4f})")
     print()
     print(f"Distancia en línea recta: {distancia}")
     print()
@@ -236,14 +243,21 @@ def procesar_viaje():
     mostrar_coordenadas("Origen: ", datos_origen)
     mostrar_coordenadas("Destino:", datos_destino)
 
-    # Paso 6: ahora sí, los cálculos con las funciones de utils.py.
-    km = calcular_distancia(datos_origen["lat"], datos_origen["lon"],
-                            datos_destino["lat"], datos_destino["lon"])
+    # Paso 7 (POO): con los datos sueltos de la API armamos dos objetos Ciudad.
+    # Así el nombre, el país y las coordenadas dejan de andar por separado.
+    origen = Ciudad(datos_origen["nombre"], datos_origen["pais"],
+                    datos_origen["lat"], datos_origen["lon"])
+    destino = Ciudad(datos_destino["nombre"], datos_destino["pais"],
+                     datos_destino["lat"], datos_destino["lon"])
+
+    # El objeto sabe calcular su propia distancia a otra ciudad.
+    # Antes era: calcular_distancia(lat1, lon1, lat2, lon2)
+    km = origen.distancia_a(destino)
     millas = km_a_millas(km)
     tiempo_avion = formatear_tiempo(calcular_tiempo(km, VELOCIDAD_AVION))
     tiempo_auto = formatear_tiempo(calcular_tiempo(km, VELOCIDAD_AUTO))
 
-    mostrar_resultado(datos_origen, datos_destino, km, millas,
+    mostrar_resultado(origen, destino, km, millas,
                       tiempo_avion, tiempo_auto, unidad)
 
 
