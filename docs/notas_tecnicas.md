@@ -9,14 +9,15 @@
 | Paso 6 | Distancia (Haversine), tiempos y MVP | `utils.py`, `main.py` |
 | Paso 7 | Clase `Ciudad` (POO) | `ciudad.py` |
 | Paso 8 | Clima actual (Forecast API) | `clima.py`, `main.py` |
+| Paso 9 | Conversión de divisas (ExchangeRate-API) | `divisas.py`, `main.py` |
 
 ## Casos de prueba de la API
 
 | Caso | Resultado |
 |---|---|
 | Ciudad conocida (`Madrid, España`) | `lat 40.4165, lon -3.7026` |
-| Ciudad inventada (`Xyzabc, Nolandia`) | "No encontramos…" y vuelve a preguntar |
-| Sin internet (wifi apagado) | "No se pudo conectar con la API…" y el programa sigue vivo |
+| Ciudad inventada (`Xyzabc, Nolandia`) | "Ciudad no encontrada" y regreso al menú |
+| Sin internet y ciudad fuera del caché | "Error de red" y regreso al menú |
 | Falta el país (`Madrid`) | Avisa del formato "ciudad, país" |
 
 Para correrlos: desde el menú de `main.py`, opción 1.
@@ -90,6 +91,34 @@ reportan algunos.
 El tercero es el importante: si en vez de eso el programa te devuelve al menú,
 el `try/except` del clima quedó mal puesto.
 
+## Conversión de divisas (Paso 9)
+
+La opción 3 del menú usa ExchangeRate-API, la tercera API del proyecto.
+La opción 4 termina el programa.
+
+1. `procesar_divisas()` pide dos códigos de moneda de tres letras, los
+   convierte a mayúsculas y valida un monto finito mayor o igual a cero.
+   Acepta punto o coma como separador decimal.
+2. `obtener_tasa()` envía el código de origen en una petición GET a
+   `https://open.er-api.com/v6/latest/{origen}`. Usa `requests` con un
+   límite de espera de 10 segundos y obtiene el código de destino
+   del diccionario `rates` en la respuesta.
+3. `main.py` calcula `monto * tasa` y muestra un recuadro con el equivalente,
+   el monto original, la tasa aplicada y la fuente. Los montos se muestran
+   con dos decimales.
+
+El servicio publica tasas diarias y su endpoint abierto funciona sin clave.
+Solo se envía el código de origen. El monto se usa para el cálculo local.
+[Documentación de ExchangeRate-API](https://www.exchangerate-api.com/docs/free)
+
+| Caso | Resultado esperado |
+|---|---|
+| `usd` → `pen`, monto `87`, tasa simulada `3.45634` | Equivalente de `300.70 PEN` |
+| Código con formato inválido | Pide un código de tres letras y regresa al menú |
+| Moneda sin tasa disponible, como destino `ZZZ` | Avisa que no hay tasa y regresa al menú |
+| Monto negativo o no numérico | Muestra un aviso y regresa al menú |
+| Sin conexión o con tiempo de espera agotado | Avisa que no pudo consultar la tasa y regresa al menú |
+
 ## Error de certificado SSL (solo en la computadora de Eduardo)
 
 Norton inspecciona el tráfico HTTPS y Python no reconocía su certificado, así
@@ -147,7 +176,7 @@ Usuario escribe "Layton, Estados Unidos"
 │                   │                                       │
 │                   └── ¿falló? (sin internet, no existe,   │
 │                   │            timeout, formato malo)     │
-│                          └─► {"ok": False, "mensaje": …}  │
+│                          └─► None o ConnectionError      │
 │                              NO se guarda nada en el JSON │
 └───────────────────────────────────────────────────────────┘
             │

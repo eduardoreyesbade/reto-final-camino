@@ -6,6 +6,7 @@
 # Paso 6: Calcula la distancia y los tiempos, y muestra el resumen
 # Paso 7: Usa objetos Ciudad en vez de diccionarios sueltos (POO)
 # Paso 8: Muestra el clima actual de las dos ciudades (Open-Meteo Forecast)
+# Paso 9: Convierte un monto entre dos monedas (ExchangeRate-API)
 # Integrantes: Tito Huerta y Eduardo Reyes
 # Fecha: 23 de noviembre de 2026 (Updated)
 # ============================================================
@@ -15,12 +16,14 @@
 # La funcionalidad adicional de Weather la hice Eduardo Reyes
 
 import sys
+from math import isfinite
 
 # trae la data de la ubicacion via API
 from api import obtener_coordenadas
 
 # trae la data del clima via API
 from clima import obtener_clima
+from divisas import obtener_tasa
 
 # Paso 7: la clase que agrupa los datos de una ciudad y sus acciones
 from ciudad import Ciudad
@@ -58,7 +61,8 @@ def mostrar_menu():
     print()
     print("1. Calcular distancia entre dos ciudades")
     print("2. Clima actual de una ciudad")
-    print("3. Salir")
+    print("3. Conversión de divisas")
+    print("4. Salir")
 
 # Usamos dos funciones separadas para pedir el origen y el destino,
 # para que cada una sea clara y específica.
@@ -360,6 +364,55 @@ def procesar_clima():
     print("==================================")
 
 
+def procesar_divisas():
+    """Opción 3 del menú: convierte un monto con la tasa de la API."""
+    print()
+    print("Códigos de ejemplo: USD (Estados Unidos), PEN (Perú), EUR (zona euro).")
+    origen = input("Moneda de origen: ").strip().upper()
+    destino = input("Moneda de destino: ").strip().upper()
+
+    for moneda in (origen, destino):
+        if len(moneda) != 3 or not moneda.isascii() or not moneda.isalpha():
+            print("Escribe un código de tres letras, como USD o PEN.")
+            return
+
+    try:
+        monto = float(input("Monto a convertir: ").strip().replace(",", "."))
+    except ValueError:
+        print("Ingresa un monto numérico, por ejemplo 100 o 12.50")
+        return
+
+    if not isfinite(monto) or monto < 0:
+        print("Ingresa un monto finito mayor o igual a cero.")
+        return
+
+    print("Consultando la tasa de cambio...")
+    try:
+        tasa = obtener_tasa(origen, destino)
+    except ConnectionError as error:
+        print(error)
+        return
+
+    if tasa is None:
+        print(f"No hay una tasa disponible de {origen} a {destino}. "
+              "Revisa los códigos de moneda.")
+        return
+
+    # La tasa indica cuántas unidades de destino vale una unidad de origen.
+    total = monto * tasa
+    if not isfinite(total):
+        print("El monto es demasiado grande para convertirlo.")
+        return
+
+    print()
+    print("========== CONVERSIÓN DE DIVISAS ==========")
+    print(f"Equivalente    ≈ {total:,.2f} {destino}")
+    print(f"Monto original   {monto:,.2f} {origen}")
+    print(f"Tasa de cambio   1 {origen} = {tasa:g} {destino}")
+    print("===========================================")
+    print("Fuente: ExchangeRate-API · https://www.exchangerate-api.com")
+
+
 def main():
     """Programa principal: el menú se repite hasta que el usuario elige salir."""
     mostrar_bienvenida()
@@ -375,11 +428,12 @@ def main():
             # Paso 8: el clima por sí solo, sin calcular ningún viaje.
             procesar_clima()
         elif opcion == "3":
+            procesar_divisas()
+        elif opcion == "4":
             # Si quiere salir del programa.
             print("Gracias por usar el programa. ¡Hasta luego!")
             break
         else:
-            # Esto es por si no responde 1, 2 ni 3.
             print("Opción no válida. Por favor, ingrese una opción válida.")
 
 

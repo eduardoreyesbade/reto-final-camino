@@ -12,11 +12,14 @@ Integrantes:
 
 Pides dos ciudades y el programa busca sus coordenadas en internet (por medio deuna API), calcula la distancia en línea recta entre ellas y estima los tiempos de viaje y nos permite saber la distancia tanto en millas como en kilometros.
 
+También puedes consultar el clima de una ciudad o convertir un monto entre dos monedas. Consulta el [README principal](../README.md) para ver el ejemplo de conversión, las [notas técnicas](notas_tecnicas.md) para ver las APIs y el [pseudocódigo](pseudocodigo_v2.md) para ver el flujo completo.
 
 ## Cómo está organizado
 
 - `main.py` - el menú y el programa principal
 - `api.py` - la conexión con Open-Meteo para buscar coordenadas
+- `clima.py` - la consulta del clima a Open-Meteo Forecast
+- `divisas.py` - la consulta de tasas a ExchangeRate-API
 - `requirements.txt` - las librerías que hacen falta
 
 
@@ -29,30 +32,19 @@ debes ingresar a nuestro repositorio de github en la ruta: https://github.com/ed
 
 ```
 =====================================
-   CAMINO A MI CASA (EJEMPLO BAISCO)
+   CAMINO A MI CASA
 =====================================
 
 1. Calcular distancia entre dos ciudades
-2. Salir
-
-Ingrese la opción deseada: 1
-
-Ciudad de origen: Ogden, Estados Unidos
-Ciudad de destino: Santiago, Chile
-
-  Ogden, United States
-  41.223, -111.973
-
-  Santiago, Chile
-  -33.457, -70.648
-
-  Distancia: 9,318 km (5,790 millas)
-
+2. Clima actual de una ciudad
+3. Conversión de divisas
+4. Salir
 ```
 
 ## Nota
 
-Por seguridad, el programa solo usa ciudad y país. No guarda ni pide direcciones exactas. Unicamente solicita Ciudad y Pais en el siguiente formato "Ciudad","Pais"
+Para las búsquedas geográficas, el programa pide lugares en el formato
+`ciudad, país`. Para la conversión, pide dos códigos de moneda y un monto.
 
 ## Autores
 

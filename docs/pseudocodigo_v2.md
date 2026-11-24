@@ -2,11 +2,10 @@
 
 **Proyecto:** Camino a mi casa (CS 1400)
 **Integrantes:** Tito Huerta y Eduardo Reyes
-**Fecha:** 23 de noviembre de 2026
+**Actualizado:** 24 de noviembre de 2026
 
-Esta es la versión **después** de refactorizar con Programación Orientada a
-Objetos (Paso 7). La versión v1 se conserva sin cambios en
-[`seudo_codigo.txt`](seudo_codigo.txt).
+Este pseudocódigo describe el flujo con la clase `Ciudad` (Paso 7),
+el clima actual (Paso 8) y la conversión de divisas (Paso 9).
 
 ---
 
@@ -18,8 +17,7 @@ Objetos (Paso 7). La versión v1 se conserva sin cambios en
 | `CALCULAR distancia(lat1, lon1, lat2, lon2)` | `origen.distancia_a(destino)` |
 | Para mostrar una ciudad había que armar el texto cada vez | El objeto sabe describirse con `__str__` |
 
-El comportamiento del programa **no cambió**: los mismos casos de prueba del
-Paso 6 dan exactamente el mismo resultado.
+La refactorización conservó los cálculos de distancia y tiempos del Paso 6.
 
 ---
 
@@ -64,7 +62,8 @@ INICIO
       MOSTRAR menú
           1. Calcular distancia entre dos ciudades
           2. El clima de una ciudad
-          3. Salir
+          3. Conversión de divisas
+          4. Salir
 
       PEDIR opción al usuario
 
@@ -113,6 +112,9 @@ INICIO
           origen  <- CREAR Ciudad(nombre, pais, latitud, longitud) del origen
           destino <- CREAR Ciudad(nombre, pais, latitud, longitud) del destino
 
+          INTENTAR consultar el clima de ambas ciudades
+          SI falla la consulta, MOSTRAR aviso y CONTINUAR con clima no disponible
+
           km <- origen.distancia_a(destino)
           ------------------------------------
 
@@ -125,19 +127,41 @@ INICIO
               nombre, país y coordenadas de cada ciudad
               distancia en km y en millas
               tiempo estimado en avión y en auto
+              clima de cada ciudad cuando esté disponible
               aviso de que es distancia en línea recta
 
-      SI NO, SI opcion es 2, ENTONCES
-    
-      REPETIR
-              PEDIR lugar de origen
+      SI NO, SI opción es 2 ENTONCES
+
+          REPETIR
+              PEDIR lugar para consultar el clima
           HASTA QUE no esté vacío Y tenga el formato "ciudad, país"
-        
-        origen  <- CREAR Ciudad(nombre, pais, latitud, longitud) del origen
 
+          BUSCAR las coordenadas de la ciudad
+          SI falla la búsqueda o no hay resultados, MOSTRAR aviso y VOLVER al menú
 
+          CREAR objeto Ciudad con los datos encontrados
+          CONSULTAR el clima con la latitud y la longitud
+          MOSTRAR temperatura y descripción del cielo, o un aviso si faltan datos
 
       SI NO, SI opción es 3 ENTONCES
+
+          PEDIR códigos de origen y destino y convertirlos a mayúsculas
+          SI algún código no tiene tres letras, MOSTRAR aviso y VOLVER al menú
+
+          PEDIR monto
+          SI el monto no es un número finito mayor o igual a cero,
+              MOSTRAR aviso y VOLVER al menú
+
+          CONSULTAR tasas de la moneda de origen en ExchangeRate-API
+          BUSCAR la tasa de destino
+          SI falla la consulta o falta la tasa, MOSTRAR aviso y VOLVER al menú
+
+          equivalente <- monto * tasa
+          SI el equivalente no es finito, MOSTRAR aviso y VOLVER al menú
+          MOSTRAR recuadro con equivalente, monto original y tasa aplicada
+          MOSTRAR la fuente de la tasa
+
+      SI NO, SI opción es 4 ENTONCES
           MOSTRAR despedida
           SALIR del bucle
 

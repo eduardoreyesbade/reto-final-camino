@@ -2,9 +2,13 @@ INICIO
 
   MOSTRAR mensaje de bienvenida y que hace el programa
 
+    REPETIR
+
       MOSTRAR menú
           1. Calcular distancia entre dos ciudades
-          2. Salir
+          2. Clima Actual en una ciudad
+          3. Conversión de divisas
+          4. Salir
 
       PEDIR opción al usuario
 
@@ -12,21 +16,30 @@ INICIO
 
           REPETIR
               PEDIR ciudad de origen
-          HASTA QUE el texto no esté vacío (validacion)
+              VALIDAR formato "ciudad, pais"
+          HASTA QUE el formato sea validado
 
           REPETIR
               PEDIR ciudad de destino
-          HASTA QUE el texto no esté vacío
+          HASTA QUE tenga el formato "ciudad, país"
+
+          SI el origen y destino son iguales, MOSTRAR aviso y VOLVER al menú
+          PEDIR unidad de distancia (km o millas)
+          MOSTRAR resumen de confirmación
 
           BUSCAR coordenadas del origen en la API
           BUSCAR coordenadas del destino en la API
+          SI falla la conexión, MOSTRAR aviso y VOLVER al menú
 
           SI alguna ciudad no se encontró ENTONCES
               MOSTRAR "No encontramos esa ciudad"
               VOLVER al menú
           FIN SI
 
-          CALCULAR distancia en kilómetros con el API
+          CREAR un objeto Ciudad para cada lugar
+          CONSULTAR el clima de ambos lugares
+          SI falla la consulta del clima, MOSTRAR aviso y CONTINUAR
+          CALCULAR distancia en kilómetros con la fórmula de Haversine
           CONVERTIR la distancia a millas
 
           CALCULAR tiempo en avión = distancia / 800
@@ -37,9 +50,27 @@ INICIO
               coordenadas de cada ciudad
               distancia en km y en millas
               tiempo en avión y en auto
+              clima de ambas ciudades si está disponible
               aviso de que es distancia en línea recta
 
       SI NO, SI opción es 2 ENTONCES
+          PEDIR una ciudad con formato "ciudad, país"
+          BUSCAR sus coordenadas
+          CONSULTAR el clima con esas coordenadas
+          MOSTRAR temperatura y estado del cielo, o un aviso si falla la consulta
+
+      SI NO, SI opción es 3 ENTONCES
+          PEDIR dos códigos de moneda de tres letras y validarlos
+          PEDIR un monto numérico finito mayor o igual a cero
+          SI algún dato es inválido, MOSTRAR aviso y VOLVER al menú
+          CONSULTAR la tasa de cambio en ExchangeRate-API
+          SI falla la consulta o falta la tasa, MOSTRAR aviso y VOLVER al menú
+          CALCULAR equivalente = monto * tasa
+          SI el equivalente no es finito, MOSTRAR aviso y VOLVER al menú
+          MOSTRAR recuadro con equivalente, monto original y tasa aplicada
+          MOSTRAR la fuente de la tasa
+
+      SI NO, SI opción es 4 ENTONCES
           MOSTRAR despedida
           SALIR del bucle
 
