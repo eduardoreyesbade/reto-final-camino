@@ -63,7 +63,8 @@ INICIO
 
       MOSTRAR menú
           1. Calcular distancia entre dos ciudades
-          2. Salir
+          2. El clima de una ciudad
+          3. Salir
 
       PEDIR opción al usuario
 
@@ -126,12 +127,17 @@ INICIO
               tiempo estimado en avión y en auto
               aviso de que es distancia en línea recta
 
-          MOSTRAR si esta disponible:
-             el clima en el el lugar de origen
-             el clima en el lugar de destino
+      SI NO, SI opcion es 2, ENTONCES
+    
+      REPETIR
+              PEDIR lugar de origen
+          HASTA QUE no esté vacío Y tenga el formato "ciudad, país"
+        
+        origen  <- CREAR Ciudad(nombre, pais, latitud, longitud) del origen
 
 
-      SI NO, SI opción es 2 ENTONCES
+
+      SI NO, SI opción es 3 ENTONCES
           MOSTRAR despedida
           SALIR del bucle
 

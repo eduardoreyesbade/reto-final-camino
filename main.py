@@ -55,7 +55,8 @@ def mostrar_menu():
     """Imprime las opciones del menú principal."""
     print()
     print("1. Calcular distancia entre dos ciudades")
-    print("2. Salir")
+    print("2. Clima actual de una ciudad")
+    print("3. Salir")
 
 # Usamos dos funciones separadas para pedir el origen y el destino,
 # para que cada una sea clara y específica.
@@ -155,6 +156,7 @@ def mostrar_resumen(origen, destino, unidad):
     print(f"Destino: {destino}")
     print(f"Unidad:  {unidad}")
     print("Consultando datos...")
+
 
 def mostrar_coordenadas(etiqueta, datos):
     """
@@ -305,6 +307,57 @@ def procesar_viaje():
                       clima_origen, clima_destino)
 
 
+def procesar_clima():
+    """
+    Opción 2 del menú: muestra solo el clima actual de UNA ciudad.
+
+    Reusa las mismas piezas que la opción 1: la validación del formato,
+    obtener_coordenadas() (con su caché) y obtener_clima(). Aquí el clima
+    NO es un extra: es lo único que pidió el usuario, así que si falla la
+    red avisamos y volvemos al menú.
+    """
+    print()
+    # Reusamos pedir_origen() porque la etiqueta es un parámetro: valida
+    # el formato "ciudad, país" igual que en la opción 1.
+    lugar = pedir_origen("Ingrese la ciudad (ciudad, pais)")
+
+    print()
+    print("Consultando datos...")
+
+    # Primero las coordenadas: el clima se pide por latitud y longitud.
+    try:
+        datos = obtener_coordenadas(lugar)
+    except ConnectionError as error:
+        print(f"  -> Error de red: {error}")
+        return
+
+    if datos is None:
+        print(f"  -> Ciudad no encontrada: {lugar}")
+        return
+
+    print()
+    mostrar_coordenadas("Ubicación:", datos)
+
+    # Paso 7 (POO): también aquí trabajamos con un objeto Ciudad.
+    ciudad = Ciudad(datos["nombre"], datos["pais"], datos["lat"], datos["lon"])
+
+    try:
+        clima = obtener_clima(ciudad.latitud, ciudad.longitud)
+    except ConnectionError as error:
+        print(f"  -> No se pudo obtener el clima: {error}")
+        return
+
+    print()
+    print("========== CLIMA ACTUAL ==========")
+    print(f"Ciudad:      {ciudad.nombre}, {ciudad.pais}")
+    if clima is None:
+        print("La API no devolvió datos del clima.")
+    else:
+        print(f"Temperatura: {clima['temperatura']} {clima['unidad']}")
+        print(f"Cielo:       {clima['descripcion']}")
+    print("==================================")
+
+
 def main():
     """Programa principal: el menú se repite hasta que el usuario elige salir."""
     mostrar_bienvenida()
@@ -317,11 +370,14 @@ def main():
         if opcion == "1":
             procesar_viaje()
         elif opcion == "2":
+            # Paso 8: el clima por sí solo, sin calcular ningún viaje.
+            procesar_clima()
+        elif opcion == "3":
             # Si quiere salir del programa.
             print("Gracias por usar el programa. ¡Hasta luego!")
             break
         else:
-            # Esto es por si no responde ni 1 ni 2.
+            # Esto es por si no responde 1, 2 ni 3.
             print("Opción no válida. Por favor, ingrese una opción válida.")
 
 
