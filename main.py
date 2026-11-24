@@ -12,6 +12,8 @@
 # Privacidad: al usuario solo se le piden CIUDAD y PAÍS.
 # Nunca direcciones exactas, ni en el código ni en GitHub.
 
+# La funcionalidad adicional de Weather la hice Eduardo Reyes
+
 import sys
 
 # trae la data de la ubicacion via API
