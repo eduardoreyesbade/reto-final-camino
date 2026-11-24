@@ -21,6 +21,7 @@ Tito Huerta y Eduardo Reyes
 4. Calcula la distancia con la fórmula de **Haversine**.
 5. Estima el tiempo de viaje en avión (800 km/h) y en auto (80 km/h).
 6. Muestra un resumen con todo.
+7. Muestra -si estan disponible- la informacion del clima en los lugares solicitados.
 
 Las consultas se guardan en un caché local, así que si buscas la misma ciudad
 dos veces la segunda es instantánea y no gasta internet.

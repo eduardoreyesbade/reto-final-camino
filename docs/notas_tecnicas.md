@@ -20,6 +20,12 @@
 
 Para correrlos: desde el menú de `main.py`, opción 1.
 
+
+## Clima API
+
+Similar al calculo de las distancias, pero se usa la API para traer la data del clima en los lugares solicitados. 
+
+
 ## Error de certificado SSL (solo en la computadora de Eduardo)
 
 Norton inspecciona el tráfico HTTPS y Python no reconocía su certificado, así

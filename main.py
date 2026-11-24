@@ -13,7 +13,12 @@
 
 import sys
 
+# trae la data de la ubicacion via API
 from api import obtener_coordenadas
+
+# trae la data del clima via API
+from clima import obtener_clima
+
 
 # Paso 7: la clase que agrupa los datos de una ciudad y sus acciones.
 from ciudad import Ciudad
@@ -152,7 +157,9 @@ def mostrar_resumen(origen, destino, unidad):
     print("Consultando datos...")
 
 def mostrar_coordenadas(etiqueta, datos):
-    """Imprime el nombre, el país y las coordenadas de un lugar."""
+    """
+    Imprime el nombre, el país y las coordenadas de un lugar.
+    """
     # Si el dato venía guardado de una búsqueda anterior, se lo avisamos
     # al usuario para que sepa por qué fue tan rápido.
     if datos.get("desde_cache"):
@@ -164,7 +171,22 @@ def mostrar_coordenadas(etiqueta, datos):
           f"→ lat {datos['lat']:.4f}, lon {datos['lon']:.4f}{origen}")
 
 
-def mostrar_resultado(origen, destino, km, millas, tiempo_avion, tiempo_auto, unidad):
+def mostrar_clima(etiqueta, ciudad, clima):
+    """
+    Imprime el clima actual de una ciudad. 
+    """
+    # None significa que no se pudo conseguir el dato. Lo decimos y seguimos:
+    # el clima es un extra, no la razón de ser del programa.
+    if clima is None:
+        print(f"{etiqueta} {ciudad.nombre}: clima no disponible")
+        return
+
+    print(f"{etiqueta} {ciudad.nombre}: {clima['temperatura']} {clima['unidad']}"
+          f"  -  {clima['descripcion']}")
+
+    
+def mostrar_resultado(origen, destino, km, millas, tiempo_avion, tiempo_auto,
+                      unidad, clima_origen, clima_destino):
     """
     Imprime el resumen final del viaje ya calculado.
 
@@ -175,6 +197,8 @@ def mostrar_resultado(origen, destino, km, millas, tiempo_avion, tiempo_auto, un
         km, millas (float): la distancia en cada unidad.
         tiempo_avion, tiempo_auto (str): los tiempos ya con formato "X h Y min".
         unidad (str): "kilómetros" o "millas", lo que el usuario prefirió.
+        clima_origen, clima_destino (dict | None): el clima de cada ciudad,
+                         o None si no se pudo consultar.
     """
     # El :,.2f pone el separador de miles y deja dos decimales (3,478.52).
     if unidad == "millas":
@@ -182,8 +206,8 @@ def mostrar_resultado(origen, destino, km, millas, tiempo_avion, tiempo_auto, un
     else:
         distancia = f"{km:,.2f} km  ({millas:,.2f} millas)"
 
-    # Paso 7: ahora leemos los ATRIBUTOS del objeto (origen.nombre) en vez
-    # de las llaves de un diccionario (origen["nombre"]).
+    # Paso 7: ahora leemos los ATRIBUTOS del objeto (origen.nombre)
+    
     print()
     print("========== RESUMEN DEL VIAJE ==========")
     print(f"Origen:   {origen.nombre}, {origen.pais}  "
@@ -195,10 +219,15 @@ def mostrar_resultado(origen, destino, km, millas, tiempo_avion, tiempo_auto, un
     print()
     print(f"Tiempo estimado en avión ({VELOCIDAD_AVION} km/h):  {tiempo_avion}")
     print(f"Tiempo estimado en auto  ({VELOCIDAD_AUTO} km/h):   {tiempo_auto}")
+
+    # Paso 8: el clima actual de cada ciudad, dentro del mismo recuadro.
+    print()
+    print("--- Clima actual ---")
+    mostrar_clima("Origen: ", origen, clima_origen)
+    mostrar_clima("Destino:", destino, clima_destino)
     print()
     print("* La distancia es una aproximación en línea recta, no por carretera.")
     print("=======================================")
-
 
 def procesar_viaje():
     """
@@ -250,6 +279,20 @@ def procesar_viaje():
     destino = Ciudad(datos_destino["nombre"], datos_destino["pais"],
                      datos_destino["lat"], datos_destino["lon"])
 
+    # Paso 8: el clima es un EXTRA. Si falla, el resumen del viaje se tiene
+    # que mostrar igual, así que atrapamos el ConnectionError AQUÍ (no hacemos
+    # return como en las coordenadas) y seguimos con None.
+    print()
+    print("Consultando el clima...")
+    try:
+        clima_origen = obtener_clima(origen.latitud, origen.longitud)
+        clima_destino = obtener_clima(destino.latitud, destino.longitud)
+    except ConnectionError as error:
+        print(f"  -> No se pudo obtener el clima: {error}")
+        clima_origen = None
+        clima_destino = None
+
+
     # El objeto sabe calcular su propia distancia a otra ciudad.
     # Antes era: calcular_distancia(lat1, lon1, lat2, lon2)
     km = origen.distancia_a(destino)
@@ -258,7 +301,8 @@ def procesar_viaje():
     tiempo_auto = formatear_tiempo(calcular_tiempo(km, VELOCIDAD_AUTO))
 
     mostrar_resultado(origen, destino, km, millas,
-                      tiempo_avion, tiempo_auto, unidad)
+                      tiempo_avion, tiempo_auto, unidad,
+                      clima_origen, clima_destino)
 
 
 def main():

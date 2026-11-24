@@ -126,6 +126,11 @@ INICIO
               tiempo estimado en avión y en auto
               aviso de que es distancia en línea recta
 
+          MOSTRAR si esta disponible:
+             el clima en el el lugar de origen
+             el clima en el lugar de destino
+
+
       SI NO, SI opción es 2 ENTONCES
           MOSTRAR despedida
           SALIR del bucle
