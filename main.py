@@ -36,7 +36,10 @@ VELOCIDAD_AVION = 800   # km/h, velocidad crucero aproximada de un avión comerc
 VELOCIDAD_AUTO = 80     # km/h, promedio razonable en carretera
 
 # En Windows la consola no usa UTF-8 por defecto y los acentos salen mal.
-sys.stdout.reconfigure(encoding="utf-8")
+# El if es para entornos como Google Colab o Jupyter, donde sys.stdout
+# no es una consola y no tiene el metodo reconfigure().
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
 
 # Las únicas respuestas que aceptamos para la unidad de medida.
 UNIDADES = {

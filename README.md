@@ -80,6 +80,28 @@ Fuente: ExchangeRate-API · https://www.exchangerate-api.com
 
 El flujo del menú está en el [pseudocódigo](docs/pseudocodigo_v2.md) y los detalles de las consultas están en las [notas técnicas](docs/notas_tecnicas.md).
 
+### Probarlo sin instalar nada
+
+Si no tienes Python instalado (o no quieres instalarlo), puedes correrlo
+desde el navegador con **GitHub Codespaces**. Solo hace falta una cuenta de
+GitHub, que es gratis:
+
+1. En este repositorio, haz clic en el botón verde **Code**.
+2. Pestaña **Codespaces** → **Create codespace on main**.
+3. Espera a que se abra el editor y, en la terminal de abajo, escribe:
+
+```bash
+pip install -r requirements.txt
+python main.py
+```
+
+Es una máquina Linux de verdad, así que el programa corre tal cual, sin
+adaptaciones. La primera vez tarda un par de minutos en prepararse.
+
+Nota: la carpeta `data/` no viaja en el repositorio, así que el caché de
+coordenadas empieza vacío. El aviso `(desde el caché)` aparecerá a partir de
+la segunda vez que busques la misma ciudad.
+
 ### Probar las piezas por separado
 
 Cada módulo se puede correr solo, sin el menú:
