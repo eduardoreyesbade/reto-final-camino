@@ -3,3 +3,6 @@ __pycache__/
 
 # El caché de coordenadas se genera solo al correr el programa.
 data/
+
+# Archivos temporales de Office (el candado que crea al abrir un archivo)
+~$*
