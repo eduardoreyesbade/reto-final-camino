@@ -15,7 +15,7 @@ import sys
 
 from api import obtener_coordenadas
 
-# Paso 7: la clase que agrupa los datos de una ciudad y sus acciones.
+# Paso 7: la clase que agrupa los datos de una ciudad y sus acciones
 from ciudad import Ciudad
 
 # De utils traemos las funciones de calculo. Ya no importamos
@@ -56,7 +56,7 @@ def mostrar_menu():
 # para que cada una sea clara y específica.
 def pedir_origen(etiqueta):
     """
-    Pide el lugar de ORIGEN y repite la pregunta hasta que sea válido.
+    Pide el lugar de ORIGEN y repite la pregunta hasta que sea valido.
 
     Parámetros:
         etiqueta (str): el texto que se le muestra al usuario.
