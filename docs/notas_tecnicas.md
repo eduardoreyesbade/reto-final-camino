@@ -8,6 +8,7 @@
 | Paso 5 | API de geocodificación Open-Meteo | `api.py` |
 | Paso 6 | Distancia (Haversine), tiempos y MVP | `utils.py`, `main.py` |
 | Paso 7 | Clase `Ciudad` (POO) | `ciudad.py` |
+| Paso 8 | Clima actual (Forecast API) | `clima.py`, `main.py` |
 
 ## Casos de prueba de la API
 
@@ -21,10 +22,73 @@
 Para correrlos: desde el menú de `main.py`, opción 1.
 
 
-## Clima API
+## Clima API (Paso 8)
 
-Similar al calculo de las distancias, pero se usa la API para traer la data del clima en los lugares solicitados. 
+Es la **segunda API** del proyecto, y conviene no confundirla con la primera:
 
+| | Geocoding (`api.py`) | Forecast (`clima.py`) |
+|---|---|---|
+| Dominio | `geocoding-api.open-meteo.com` | `api.open-meteo.com` |
+| Recibe | `"ciudad, país"` | `latitude` y `longitude` |
+| Devuelve | nombre, país, lat, lon | temperatura y `weather_code` |
+
+Las dos se usan en cadena: `api.py` traduce lo que escribió el usuario a
+coordenadas, y con esas mismas coordenadas `clima.py` pide el clima. Al usuario
+no se le pregunta nada nuevo, así que la privacidad del proyecto no cambia.
+
+La consulta (gratis, sin API key):
+
+```
+https://api.open-meteo.com/v1/forecast?latitude=14.97&longitude=-91.79&current=temperature_2m,weather_code
+```
+
+Y la respuesta:
+
+```json
+{
+  "current_units": { "temperature_2m": "°C" },
+  "current": { "time": "2026-11-24T17:00", "temperature_2m": 12.4, "weather_code": 3 }
+}
+```
+
+### La tabla de códigos
+
+`weather_code` es un **número**, no un texto. La traducción está en el
+diccionario `CODIGOS_CLIMA` de `clima.py`, copiado de la tabla oficial
+*"WMO Weather interpretation codes (WW)"* de <https://open-meteo.com/en/docs>
+(está al final de la lista de variables, en la propia página; no es un archivo
+descargable).
+
+**Ojo:** no sirve la tabla `conditions.json` de weatherapi.com. Es de otra
+empresa y sus códigos son de 4 dígitos (1000, 1003, 1006...). No hay ni uno en
+común con los códigos WMO (0 a 99), así que el programa correría igual pero
+nunca mostraría el clima: un bug silencioso. Por eso `describir_clima()`
+devuelve `"Código desconocido (NN)"` en vez de fallar — la tabla WMO tampoco
+está completa en todos los modelos: los códigos 96 y 99, de granizo, solo los
+reportan algunos.
+
+### Dos decisiones de diseño
+
+- **Si el clima falla, el viaje se muestra igual.** En `procesar_viaje()` hay
+  dos `try/except ConnectionError` distintos: el de las coordenadas hace
+  `return` y vuelve al menú (sin coordenadas no hay nada que calcular), y el
+  del clima guarda `None` y sigue adelante (sin clima sí hay viaje que
+  mostrar). Es la diferencia entre un dato esencial y un extra.
+- **El clima NO se guarda en el caché.** `cache.py` guarda coordenadas porque
+  no cambian nunca; la temperatura cambia cada hora. Guardarla sería un bug.
+  Por eso una ciudad que viene "(desde el caché)" igual gasta una consulta a
+  internet para el clima.
+
+### Casos de prueba del clima
+
+| Caso | Resultado |
+|---|---|
+| Ciudad válida (`Ogden, Estados Unidos`) | `Ogden: 5.0 °C  -  Despejado` |
+| Código fuera de la tabla WMO | `Código desconocido (1000)` |
+| Sin internet, ciudades ya en el caché | `clima no disponible`, y la distancia y los tiempos salen completos |
+
+El tercero es el importante: si en vez de eso el programa te devuelve al menú,
+el `try/except` del clima quedó mal puesto.
 
 ## Error de certificado SSL (solo en la computadora de Eduardo)
 

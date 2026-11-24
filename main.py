@@ -5,6 +5,7 @@
 # Paso 5: Llama a api.py para obtener las coordenadas
 # Paso 6: Calcula la distancia y los tiempos, y muestra el resumen
 # Paso 7: Usa objetos Ciudad en vez de diccionarios sueltos (POO)
+# Paso 8: Muestra el clima actual de las dos ciudades (Open-Meteo Forecast)
 # Integrantes: Tito Huerta y Eduardo Reyes
 # Fecha: 23 de noviembre de 2026 (Updated)
 # ============================================================
